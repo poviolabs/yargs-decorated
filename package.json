@@ -1,0 +1,9 @@
+{
+  "name": "yargs-decorated",
+  "version": "1.0.0",
+  "description": "Decorators and wrappers for Yargs",
+  "main": "index.js",
+  "author": "Marko Zabreznik <marko.zabreznik@poviolabs.com>",
+  "license": "MIT",
+  "packageManager": "yarn@3.1.1"
+}
