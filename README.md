@@ -1,101 +1,51 @@
 # Yargs Decorated
 
-Provides a set of decorators to hard-type and DRY Yargs options and commands
+Provides a set of decorators to make Yargs DRY and hard-typed. Supports `class-validator`.
 
-
-## Example Command
-
-Instead of this
-
-
+## Example Command with Class Validator
 
 ```typescript
 import yargs from "yargs";
-
-interface Options {
-    foo: number
-}
-
-yargs
-    .command( {
-        command: "sample",
-        describe: "A sample command",
-        options: {
-            foo: { 
-                type: "number",
-                demandOption: true
-            }
-        },
-        handler: (args: Options) =>{
-            console.log(options.foo);
-        }
-    }).parse();
-```
-
-do this
-
-```typescript
-import yargs from "yargs";
-import { YargsCommand, YargsOption, getYargsCommand } from "yargs-decorated";
+import {YargsCommand, YargsOption, getYargsCommand} from "yargs-decorated";
+import {IsEmail, validateOrReject} from "class-validator";
 
 @YargsCommand({
-  command: "sample",
-  describe: "A sample command",
+    command: "sample",
+    describe: "A sample command",
 })
 class Command {
-  @YargsOption({ alias: "f", demandOption: true })
-  foo: number;
+    @YargsOption({alias: "f"})
+    foo: number;
+
+    @YargsOption({alias: "e", demandOption: true})
+    @IsEmail()
+    email: string;
 }
 
 yargs(hideBin(process.argv)).command(
-  getYargsCommand(Command, (options: Command) => {
-      // run when calling with `sample --foo`
-    console.log(options.foo);
-  })
+    getYargsCommand(Command, async (options: Command) => {
+        await validateOrReject(options);
+        // test with calling `index.js sample --email sample@ads.com --foo`
+        console.log(options.email);
+    })
 );
 ```
 
-## Example Options
+## Example with only Options
 
-Instead of this
-```typescript
-import yargs from "yargs";
-
-interface Options {
-    foo: boolean;
-    bar: number;
-}
-
-const argv: Options = yargs
-    .options({
-        foo: {
-            alias: "f",
-            type: "boolean"
-        },
-        bar: {
-            type: "number"
-        }
-    }).parse();
-
-console.log(argv.foo);
-```
-
-do this:
 
 ```typescript
 import yargs from "yargs";
 import {
-  YargsOption,
-  getYargsOptions,
-  parseYargsOptions,
+    YargsOption,
+    getYargsOptions,
+    parseYargsOptions,
 } from "yargs-decorated";
+import {IsEmail, validateSync} from "class-validator";
 
 class Options {
-  @YargsOption({ alias: "f" })
-  foo: boolean;
-
-  @YargsOption()
-  bar: number;
+    @YargsOption({alias: "f"})
+    foo: boolean;
 }
 
 const options: Options = parseYargsOptions(Options, yargs(hideBin(process.argv))
