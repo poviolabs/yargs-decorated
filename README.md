@@ -5,6 +5,35 @@ Provides a set of decorators to hard-type and DRY Yargs options and commands
 
 ## Example Command
 
+Instead of this
+
+
+
+```typescript
+import yargs from "yargs";
+
+interface Options {
+    foo: number
+}
+
+yargs
+    .command( {
+        command: "sample",
+        describe: "A sample command",
+        options: {
+            foo: { 
+                type: "number",
+                demandOption: true
+            }
+        },
+        handler: (args: Options) =>{
+            console.log(options.foo);
+        }
+    }).parse();
+```
+
+do this
+
 ```typescript
 import yargs from "yargs";
 import { YargsCommand, YargsOption, getYargsCommand } from "yargs-decorated";
@@ -18,7 +47,6 @@ class Command {
   foo: number;
 }
 
-
 yargs(hideBin(process.argv)).command(
   getYargsCommand(Command, (options: Command) => {
       // run when calling with `sample --foo`
@@ -29,7 +57,33 @@ yargs(hideBin(process.argv)).command(
 
 ## Example Options
 
+Instead of this
 ```typescript
+import yargs from "yargs";
+
+interface Options {
+    foo: boolean;
+    bar: number;
+}
+
+const argv: Options = yargs
+    .options({
+        foo: {
+            alias: "f",
+            type: "boolean"
+        },
+        bar: {
+            type: "number"
+        }
+    }).parse();
+
+console.log(argv.foo);
+```
+
+do this:
+
+```typescript
+import yargs from "yargs";
 import {
   YargsOption,
   getYargsOptions,
@@ -42,15 +96,11 @@ class Options {
 
   @YargsOption()
   bar: number;
-
-  get fooBar() {
-    return `${this.foo} ${this.bar}`;
-  }
 }
 
-const argv = yargs(hideBin(process.argv))
-  .options(getYargsOptions(Test1Options))
-  .parse();
+const options: Options = parseYargsOptions(Options, yargs(hideBin(process.argv))
+    .options(getYargsOptions(Options))
+    .parse());
 
-const options: Options = parseYargsOptions(argv);
+console.log(options.foo)
 ```
